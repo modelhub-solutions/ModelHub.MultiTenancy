@@ -4,7 +4,21 @@
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <PackageId>ModelHub.MultiTenancy.EntityFrameworkCore</PackageId>
-    <Description>EF Core support for ModelHub.MultiTenancy: one call adds tenant query filters to every tenant entity, and a save interceptor stamps the tenant on new rows and blocks cross-tenant writes.</Description>
+    <Description>EF Core support for ModelHub.MultiTenancy. It keeps every query and every save inside the current tenant, so a forgotten Where clause can't leak one customer's data to another.
+
+What it adds:
+• ApplyTenantQueryFilters(): one call in OnModelCreating adds a tenant filter to every entity that implements ITenantEntity. A request with no tenant sees no tenant rows. Works alongside your own filters such as soft delete (a named filter on EF Core 10, combined on EF Core 8).
+• UseMultiTenancy(): a save interceptor that stamps the current tenant on new rows and refuses any insert, update, delete or tenant change that touches another tenant's data (TenantMismatchException).
+• WhereVisibleToSubTenants(): limits a query to the user's sub-tenants, such as branches, sites or departments.
+
+Example: a veterinary practice SaaS
+VetDesk sells practice-management software. Each practice group is a tenant and each clinic is a sub-tenant. Northfield Vets (clinics in Leeds and York) and Riverside Animal Care share one database.
+– A developer writes db.Appointments.ToListAsync() and forgets the practice filter. Without this package, Northfield's staff would see Riverside's clients and pets. With it, the query returns Northfield's rows only.
+– A receptionist at the York clinic sees York's appointments only; Northfield's practice manager sees both clinics.
+– A faulty import, running as Northfield, tries to save a pet record stamped with Riverside's tenant id. The save is refused before anything reaches the database.
+– A VetDesk support engineer acts as Northfield to investigate a ticket. They see exactly what Northfield sees, nothing more, and the access is logged.
+
+Targets .NET 8 (EF Core 8) and .NET 10 (EF Core 10). Use with ModelHub.MultiTenancy, which resolves the tenant from the signed-in user's token.</Description>
   </PropertyGroup>
 
   <ItemGroup>

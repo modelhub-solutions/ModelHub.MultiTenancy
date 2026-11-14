@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.1.1 (14 Nov 2026)
+
+- Fuller NuGet description for ModelHub.MultiTenancy.EntityFrameworkCore, with a worked example
+
+## 0.1.0 (14 Nov 2026)
 
 First public release, extracted from the StrideWell API.
 

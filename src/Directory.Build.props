@@ -4,14 +4,13 @@
   <!-- Package metadata shared by the library projects under src/ -->
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>Kehinde Olosunde</Authors>
     <Company>ModelHub Solutions Ltd</Company>
     <Copyright>Copyright (c) 2026 ModelHub Solutions Ltd</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>multitenancy;multi-tenant;saas;aspnetcore;efcore;tenant;jwt</PackageTags>
-    <!-- TODO: set to the ModelHub GitHub organisation before the first publish -->
     <RepositoryUrl>https://github.com/modelhub-solutions/ModelHub.MultiTenancy</RepositoryUrl>
     <PackageProjectUrl>https://github.com/modelhub-solutions/ModelHub.MultiTenancy</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
