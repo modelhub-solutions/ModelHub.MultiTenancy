@@ -1,9 +1,12 @@
+using System.Diagnostics;
+
 namespace ModelHub.MultiTenancy;
 
 /// <summary>
 /// Default <see cref="ITenantContext"/> implementation. Populated once per request by
 /// <see cref="TenantResolutionMiddleware"/>, or by <see cref="SetTenant"/> in background work.
 /// </summary>
+[DebuggerDisplay("{ToString(),nq}")]
 public sealed class TenantContext : ITenantContext
 {
     private IReadOnlyList<Guid> _subTenantIds = Array.Empty<Guid>();
@@ -77,4 +80,27 @@ public sealed class TenantContext : ITenantContext
         IsSubTenantScoped = isSubTenantScoped;
         _subTenantIds = (subTenantIds ?? Enumerable.Empty<Guid>()).Distinct().ToArray();
     }
+
+    /// <inheritdoc />
+public override string ToString()
+{
+    if (!IsAuthenticated)
+        return "Anonymous";
+
+    if (IsImpersonating && TenantId.HasValue)
+        return $"Platform admin acting as tenant {TenantId}";
+
+    if (IsPlatformAdmin)
+        return "Platform admin (all tenants)";
+
+    if (!TenantId.HasValue)
+        return "No tenant";
+
+    var result = $"Tenant {TenantId}" ;
+    if (IsSubTenantScoped && SubTenantIds.Count > 0)
+    {
+        result+=$" (sub-tenants: {SubTenantIds.Count})";
+    }
+    return result;
+}
 }
