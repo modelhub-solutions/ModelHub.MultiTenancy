@@ -1,5 +1,12 @@
 # ModelHub.MultiTenancy
 
+[![NuGet](https://img.shields.io/nuget/v/ModelHub.MultiTenancy?label=ModelHub.MultiTenancy&logo=nuget)](https://www.nuget.org/packages/ModelHub.MultiTenancy)
+[![NuGet](https://img.shields.io/nuget/v/ModelHub.MultiTenancy.EntityFrameworkCore?label=ModelHub.MultiTenancy.EntityFrameworkCore&logo=nuget)](https://www.nuget.org/packages/ModelHub.MultiTenancy.EntityFrameworkCore)
+[![Downloads](https://img.shields.io/nuget/dt/ModelHub.MultiTenancy?label=downloads)](https://www.nuget.org/packages/ModelHub.MultiTenancy)
+[![CI](https://github.com/modelhub-solutions/ModelHub.MultiTenancy/actions/workflows/ci.yml/badge.svg)](https://github.com/modelhub-solutions/ModelHub.MultiTenancy/actions/workflows/ci.yml)
+[![.NET](https://img.shields.io/badge/.NET-8%20%7C%2010-512BD4)](https://dotnet.microsoft.com/)
+[![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
+
 Lightweight, **claim-based multi-tenancy for ASP.NET Core and EF Core**.
 The tenant comes from the signed-in user's token, and one line keeps every query and every save inside that tenant.
 
