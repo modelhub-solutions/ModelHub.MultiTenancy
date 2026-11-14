@@ -23,6 +23,81 @@ This library is for the common SaaS case where **the user's token already says w
 - **Write protection, not just read filtering.** New rows get the tenant stamped automatically. Inserts, updates, deletes and "moves" that touch another tenant's data throw `TenantMismatchException`.
 - **Safe defaults.** No tenant means no tenant rows. A bad claim is treated as no tenant.
 
+## Example: a veterinary practice SaaS
+
+VetDesk sells practice-management software to groups of vet clinics. Each practice group is a **tenant** and each clinic is a **sub-tenant**. All customers share one database:
+
+| Tenant (practice group) | Sub-tenants (clinics) |
+|---|---|
+| Northfield Vets | Leeds, York |
+| Riverside Animal Care | Harrogate |
+
+```csharp
+public class Appointment : ITenantEntity, ISubTenantEntity
+{
+    public int Id { get; set; }
+    public Guid TenantId { get; set; }      // the practice group
+    public Guid? SubTenantId { get; set; }  // the clinic
+    public string PetName { get; set; } = "";
+    public DateTime StartsAt { get; set; }
+}
+
+builder.Services.AddMultiTenancy(o =>
+{
+    o.PlatformAdminRoles.Add("vetdesk_support");
+    o.TenantAdminRoles.Add("practice_manager");
+    o.SubTenantScopedRoles.Add("receptionist");
+});
+```
+
+Here is what goes wrong in a typical multi-tenant app, and what this library does about it.
+
+**1. The forgotten filter.** A developer adds a "today's appointments" endpoint and forgets to filter by practice:
+
+```csharp
+app.MapGet("/appointments/today", (VetDb db) =>
+{
+    var today = DateTime.UtcNow.Date;
+    return db.Appointments.Where(a => a.StartsAt >= today).ToListAsync();
+});
+```
+
+Without tenant filtering, Northfield's staff would see Riverside's clients and pets. With `ApplyTenantQueryFilters`, EF Core adds the tenant condition to the SQL, so Northfield gets Northfield's appointments only. Nobody has to remember the `Where`.
+
+**2. The York receptionist.** The receptionist's token says tenant Northfield, role `receptionist`, sub-tenant York:
+
+```csharp
+var appointments = await db.Appointments
+    .WhereVisibleToSubTenants(tenant)   // York only for a receptionist
+    .ToListAsync();
+```
+
+They see York's diary only. Northfield's practice manager (`practice_manager`) runs the same code and sees Leeds and York.
+
+**3. The faulty import.** A CSV import running as Northfield picks up a row with Riverside's tenant id:
+
+```csharp
+db.Appointments.Add(new Appointment { TenantId = riversideId, PetName = "Biscuit" });
+await db.SaveChangesAsync();
+// TenantMismatchException: Cannot add Appointment: it belongs to a different tenant.
+```
+
+The save is refused before anything reaches the database. Rows added without a `TenantId` are stamped with Northfield's automatically.
+
+**4. The support engineer.** A VetDesk engineer (`vetdesk_support`) investigates a Northfield ticket:
+
+```http
+GET /appointments/today
+Authorization: Bearer <support engineer's token>
+X-Tenant-Id: <Northfield's tenant id>
+```
+
+For this request they see exactly what Northfield sees, nothing from other practices, because the cross-tenant bypass is switched off while impersonating. The log records it:
+
+```
+Platform admin support-7 is acting as tenant 3f2a…c91e on /appointments/today.
+```
+
 ## Quick start
 
 ### 1. Register and add the middleware

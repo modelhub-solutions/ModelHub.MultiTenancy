@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 (14 Nov 2026)
+
+- README: worked example of a veterinary practice SaaS (VetDesk) covering the forgotten filter, sub-tenant scoping, a refused cross-tenant save and audited support impersonation
+
 ## 0.1.1 (14 Nov 2026)
 
 - Fuller NuGet description for ModelHub.MultiTenancy.EntityFrameworkCore, with a worked example
