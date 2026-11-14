@@ -178,4 +178,32 @@ public class TenantResolutionTests
         Assert.Throws<InvalidOperationException>(() => tenant.SetTenant(TenantB));
         Assert.Throws<ArgumentException>(() => new TenantContext().SetTenant(Guid.Empty));
     }
+
+    [Fact]
+    public void ToString_Returns_Expected_Format_For_All_States()
+    {
+        // 1. Anonymous
+        var anonymous = new TenantContext();
+        Assert.Equal("Anonymous", anonymous.ToString());
+
+        // 2. Authenticated, no tenant (using middleware resolution with empty claims)
+        var noTenant = Resolve(Http([C("sub", "u1")]));
+        Assert.Equal("No tenant", noTenant.ToString());
+
+        // 3. Tenant
+        var tenant = TenantContext.ForTenant(TenantA);
+        Assert.Equal($"Tenant {TenantA}", tenant.ToString());
+
+        // 4. Tenant, sub-tenant scoped
+        var subTenantScoped = TenantContext.ForTenant(TenantA, [Branch1, Branch2]);
+        Assert.Equal($"Tenant {TenantA} (sub-tenants: 2)", subTenantScoped.ToString());
+
+        // 5. Platform admin
+        var admin = TenantContext.ForPlatformAdmin();
+        Assert.Equal("Platform admin (all tenants)", admin.ToString());
+
+        // 6. Platform admin impersonating
+        var impersonating = Resolve(Http([C("role", "PLATFORM_ADMIN")], header: TenantB.ToString()));
+        Assert.Equal($"Platform admin acting as tenant {TenantB}", impersonating.ToString());
+    }
 }
