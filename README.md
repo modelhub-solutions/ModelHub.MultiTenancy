@@ -12,6 +12,8 @@ The tenant comes from the signed-in user's token, and one line keeps every query
 
 Extracted from [StrideWell](https://stridewell.app), a multi-tenant SaaS platform for gyms and coaches, where it isolates each business's data in production.
 
+**Write-up:** [The forgotten Where clause: claim-based multi-tenancy for ASP.NET Core and EF Core](https://dev.to/olosunde_kehinde_e4f0c25d/the-forgotten-where-clause-claim-based-multi-tenancy-for-aspnet-core-and-ef-core-2o63) on dev.to walks through a worked example and how the library works inside EF Core.
+
 ```
 dotnet add package ModelHub.MultiTenancy
 dotnet add package ModelHub.MultiTenancy.EntityFrameworkCore
