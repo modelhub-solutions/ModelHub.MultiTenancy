@@ -82,25 +82,25 @@ public sealed class TenantContext : ITenantContext
     }
 
     /// <inheritdoc />
-public override string ToString()
-{
-    if (!IsAuthenticated)
-        return "Anonymous";
-
-    if (IsImpersonating && TenantId.HasValue)
-        return $"Platform admin acting as tenant {TenantId}";
-
-    if (IsPlatformAdmin)
-        return "Platform admin (all tenants)";
-
-    if (!TenantId.HasValue)
-        return "No tenant";
-
-    var result = $"Tenant {TenantId}" ;
-    if (IsSubTenantScoped && SubTenantIds.Count > 0)
+    public override string ToString()
     {
-        result+=$" (sub-tenants: {SubTenantIds.Count})";
+        if (!IsAuthenticated)
+            return "Anonymous";
+
+        if (IsImpersonating && TenantId.HasValue)
+            return $"Platform admin acting as tenant {TenantId}";
+
+        if (IsPlatformAdmin)
+            return "Platform admin (all tenants)";
+
+        if (!TenantId.HasValue)
+            return "No tenant";
+
+        var result = $"Tenant {TenantId}";
+        if (IsSubTenantScoped && SubTenantIds.Count > 0)
+        {
+            result += $" (sub-tenants: {SubTenantIds.Count})";
+        }
+        return result;
     }
-    return result;
-}
 }
