@@ -28,7 +28,7 @@ This library is for the common SaaS case where **the user's token already says w
 
 - **No tenant store or strategy to configure.** The tenant id is a claim.
 - **Two levels: tenant → sub-tenant** (company → branch, school → class). Branch managers see only their branches; tenant admins see everything.
-- **Audited platform-admin impersonation.** A support admin sends `X-Tenant-Id` to act as one tenant. Their cross-tenant bypass is switched off for that request, and it is logged. Anyone else sending the header is ignored and logged.
+- **Audited platform-admin access.** A support admin sends `X-Tenant-Id` to act as one tenant; their cross-tenant bypass is switched off for that request, and it is logged. Anyone else sending the header is ignored and logged. All-tenant admin access and every admin write are logged too (see [Audit log](#audit-log)).
 - **Write protection, not just read filtering.** New rows get the tenant stamped automatically. Inserts, updates, deletes and "moves" that touch another tenant's data throw `TenantMismatchException`.
 - **Safe defaults.** No tenant means no tenant rows. A bad claim is treated as no tenant.
 
@@ -192,6 +192,23 @@ var db = scope.ServiceProvider.GetRequiredService<AppDb>();
 
 `TenantContext.ForTenant(id)` and `TenantContext.ForPlatformAdmin()` create standalone contexts for tests and maintenance work.
 A context can only be set once per scope, so one tenant's job can't silently switch to another.
+
+## Audit log
+
+Every use of the platform-admin bypass writes an `ILogger` entry at `Information`, so it lands wherever your app already ships its logs:
+
+| What happens | Logged by | Message |
+|---|---|---|
+| Admin acts as one tenant (`X-Tenant-Id`) | `TenantResolutionMiddleware` | Platform admin {UserId} is acting as tenant {TenantId} on {Path}. |
+| Admin request with all-tenant access | `TenantResolutionMiddleware` | Platform admin {UserId} has all-tenant access on {Method} {Path}. |
+| Admin adds, updates or deletes a tenant row | `TenantSaveChangesInterceptor` | Platform admin is adding / updating / deleting {EntityType} {EntityKey} in tenant {TenantId}. |
+| Admin moves a row to another tenant | `TenantSaveChangesInterceptor` | Platform admin is moving {EntityType} {EntityKey} from tenant {FromTenantId} to tenant {TenantId}. |
+| Non-admin sends `X-Tenant-Id`, or an invalid value | `TenantResolutionMiddleware` | `Warning`; the header is ignored |
+
+- The interceptor's entries carry no user id. Correlate them with the middleware entry through the request's logging scope (`RequestId` / `TraceId`) if your logger includes scopes.
+- A key shows as `(new)` when the database generates it on insert.
+- Writes in background jobs that use `TenantContext.ForPlatformAdmin()` are logged by the interceptor. **Reads** in such jobs are not: there is no request to log, so log them in the job itself.
+- `IgnoreQueryFilters()` lifts only the read filter and is not logged; writes after it are still checked by the interceptor.
 
 ## Options
 

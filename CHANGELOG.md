@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 (17 Nov 2026)
+
+- Audit log for the platform-admin bypass (#6, from a question on LinkedIn). Until now only impersonation was logged.
+  - `TenantResolutionMiddleware` logs each request that gets all-tenant access.
+  - `TenantSaveChangesInterceptor` logs every add, update, move and delete a platform admin makes, with entity type, key and tenant. This covers background jobs using `TenantContext.ForPlatformAdmin()`.
+- README: new "Audit log" section listing what is and isn't logged.
+
 ## 0.1.2 (14 Nov 2026)
 
 - README: worked example of a veterinary practice SaaS (VetDesk) covering the forgotten filter, sub-tenant scoping, a refused cross-tenant save and audited support impersonation
