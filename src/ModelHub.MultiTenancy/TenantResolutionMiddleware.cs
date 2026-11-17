@@ -89,6 +89,13 @@ public sealed class TenantResolutionMiddleware
             && !_options.TenantAdminRoles.Any(user.IsInRole)
             && _options.SubTenantScopedRoles.Any(user.IsInRole);
 
+        // 5. Audit the all-tenants bypass, as impersonation is audited above.
+        if (isPlatformAdmin)
+        {
+            _logger.LogInformation("Platform admin {UserId} has all-tenant access on {Method} {Path}.",
+                UserId(user), context.Request.Method, context.Request.Path);
+        }
+
         tenantContext.Set(tenantId, isAuthenticated: true, isPlatformAdmin, isImpersonating,
             isSubTenantScoped, subTenantIds);
     }

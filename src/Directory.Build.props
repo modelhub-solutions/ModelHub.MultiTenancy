@@ -4,7 +4,7 @@
   <!-- Package metadata shared by the library projects under src/ -->
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    <Version>0.1.2</Version>
+    <Version>0.1.3</Version>
     <Authors>Kehinde Olosunde</Authors>
     <Company>ModelHub Solutions Ltd</Company>
     <Copyright>Copyright (c) 2026 ModelHub Solutions Ltd</Copyright>
